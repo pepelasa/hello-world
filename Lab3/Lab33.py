@@ -25,7 +25,7 @@ class directory():
         fd = open(file_name, "a+")
         fd.write("%s %s %d %s\n" % (name, email, age, country))
         fd.close()
-        print("Added %s %s %d %s\n" % (name, email, age, country))
+#        print(f"Added {name} {email} {age} {country}\n")
 
     def deleteRecord(name, email, age, country):
         if not isinstance(name, str):
@@ -40,19 +40,20 @@ class directory():
         if not isinstance(country, str):
             return "Country is not a string"
 
-        fd = open(file_name, 'r', 1)
+        fd = open(file_name, 'r')
         lines = fd.readlines()
         fd.close()
  
-        print("Delete Record called with %s %s %d %s\n" % (name, email, age, country))
- 
+#        print(f"Delete Record called with {name} {email} {age} {country}\n")
+#        print(f"lines {lines}\n")
         found = False
         newFile = open(file_name, "w+")
         for line in lines:
             parsed_line = line.rstrip('\n').split(" ")
-            print(parsed_line)
-            if name == parsed_line[0] and email == parsed_line[1] and age == parsed_line[2] and country == parsed_line[3]:
-                print("Found %s %s %d %s" % (parsed_line[0], parsed_line[1], parsed_line[2], parsed_line[3]))
+#            print(parsed_line)
+#            print(f"{parsed_line[0]} {parsed_line[1]} {parsed_line[2]} {parsed_line[3]}")
+            if name == parsed_line[0] and email == parsed_line[1] and age == int(parsed_line[2]) and country == parsed_line[3]:
+#                print(f"Found {parsed_line[0]} {parsed_line[1]} {parsed_line[2]} {parsed_line[3]}")
                 found = True
             else:
                 newFile.write(line)
@@ -77,19 +78,21 @@ class directory():
         result = ''
         for line in fd:
             parsed_line = line.rstrip('\n').split(" ")
-            print(parsed_line)
-            if email == parsed_line[1] and age == parsed_line[2]:
-                print("%s %s %d %s\n" % (parsed_line[0], parsed_line[1], parsed_line[2], parsed_line[3]))
+#            print(parsed_line)
+            if email == parsed_line[1] and age == int(parsed_line[2]):
+#                print(f"Found in lookRecord {parsed_line[0]} {parsed_line[1]} {parsed_line[2]} {parsed_line[3]}")
                 result = line
         fd.close()
-        return line
+        if result != '':
+            return result
+
 
     def listAllRecords():
         fd = open(file_name, 'r', 1)
         lines = fd.readlines()
         fd.close()
         for line in lines:
-            print("%s" % line)
+            print(f"{line}")
         return lines
 
     def clearAllRecords():
@@ -99,17 +102,24 @@ class Test_Lab33(unittest.TestCase):
     #Right
     def test_clearAllRecords(self):
         self.assertIsNone(directory.clearAllRecords())
+        self.assertEqual(directory.listAllRecords(), [])
 
     def test_addRecords(self):
         self.assertIsNone(directory.addRecord("Juan", "juan@mail.com", 30, "Mexico"))
 
     def test_deleteRecords(self):
-        self.assertIsNone(directory.addRecord("delete", "delete@mail.com", 30, "Delete"))
-        self.assertIsNone(directory.deleteRecord("delete", "delete@mail.com", 30, "Delete"))
+        self.assertIsNone(directory.addRecord("delete", "delete@mail.com", 15, "Delete"))
+        self.assertIsNone(directory.deleteRecord("delete", "delete@mail.com", 15, "Delete"))
 
     def test_lookRecords(self):
-        self.assertIsNone(directory.addRecord("look", "look@mail.com", 30, "look"))
-        self.assertEqual(directory.lookRecord("delete@mail.com", 30), "look look@mail.com 30 look\n")
+        self.assertIsNone(directory.addRecord("look", "look@mail.com", 85, "look"))
+        self.assertEqual(directory.lookRecord("look@mail.com", 85), "look look@mail.com 85 look\n")
+
+    def test_listAllRecords(self):
+        self.assertIsNone(directory.clearAllRecords())
+        self.assertIsNone(directory.addRecord("Juan", "juan@mail.com", 30, "Mexico"))
+        self.assertIsNone(directory.addRecord("Pedro", "pedro@mail.com", 20, "Zapopan"))
+        self.assertEqual(directory.listAllRecords(), ['Juan juan@mail.com 30 Mexico\n', 'Pedro pedro@mail.com 20 Zapopan\n'])
 
     #Boundaries
 
@@ -143,7 +153,7 @@ class Test_Lab33(unittest.TestCase):
         self.assertEqual(directory.deleteRecord("Invalid", "invalid@mail.com", 0, 0), "Country is not a string")
 
     def test_deleteRecords_notFound(self):
-        self.assertEqual(directory.deleteRecord("notFound", "notFound@mail.com", 0, "NotFound"), "Record not found")
+        self.assertEqual(directory.deleteRecord("notFound", "notFound@mail.com", 0, "NotFound"), "Record not Found")
 
     def test_lookRecords_notFound(self):
         self.assertIsNone(directory.lookRecord("NotFound@mail.com", 0))
